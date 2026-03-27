@@ -18,6 +18,7 @@ const _defaultPbSchemaPath = 'pb_schema.json';
 const _defaultOutputDir = 'lib/generated/pocketbase';
 const _defaultLineLength = 80;
 const _defaultGenerateSystemCollections = false;
+const _defaultGenerateViewCollections = false;
 
 /// The generator of models files.
 class Generator {
@@ -42,11 +43,13 @@ class Generator {
     _lineLength = pubspecConfig.lineLength ?? _defaultLineLength;
 
     _generateSystemCollections = pubspecConfig.generateSystemCollections ?? _defaultGenerateSystemCollections;
+    _generateViewCollections = pubspecConfig.generateViewCollections ?? _defaultGenerateViewCollections;
   }
   late String _pbSchemaPath;
   late String _outputDir;
   late int _lineLength;
   late bool _generateSystemCollections;
+  late bool _generateViewCollections;
 
   /// Generates collections models files.
   Future<void> generateAsync() async {
@@ -74,6 +77,10 @@ class Generator {
     return Directory(outputDirPath).create(recursive: true);
   }
 
+  bool _isCollectionEnabled(Collection collection) =>
+      (_generateSystemCollections || !collection.system) &&
+      (_generateViewCollections || collection.type != CollectionType.view);
+
   Future<void> _generateDartFiles(File pbSchemaFile, Directory outputDirectory) async {
     final pbSchemaFileContent = pbSchemaFile.readAsStringSync();
     final pbSchemaDecoded = jsonDecode(pbSchemaFileContent);
@@ -88,7 +95,7 @@ class Generator {
       }
 
       final collectionModel = Collection.fromJson(collectionJson);
-      if (_generateSystemCollections || !collectionModel.system) {
+      if (_isCollectionEnabled(collectionModel)) {
         collections.add(collectionModel);
       }
     }
