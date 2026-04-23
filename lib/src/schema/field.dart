@@ -148,7 +148,7 @@ final class Field {
     });
   }
 
-    /// Creates a field with dynamic type for view collections.
+  /// Creates a field with dynamic type for view collections.
   /// All fields in view collections should be dynamic since they can contain
   /// aggregated data from multiple collections with different types.
   code_builder.Field toCodeBuilderForView(String className, {bool shouldOverride = false}) {
